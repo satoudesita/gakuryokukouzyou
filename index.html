@@ -2,30 +2,67 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8" />
-<title>緑ブロック伸長＆赤ブロック追加</title>
+<title>芋虫ゲーム - 空背景＆触覚あり</title>
 <style>
+  body {
+    margin: 0;
+    background: linear-gradient(to bottom, #87ceeb 0%, #b0e0ff 100%); /* 空のグラデーション */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    user-select: none;
+    font-family: sans-serif;
+  }
   #grid {
     display: grid;
     grid-template-columns: repeat(10, 40px);
     grid-template-rows: repeat(10, 40px);
-    gap: 2px;
-    width: fit-content;
-    margin: 20px auto;
+    gap: 4px;
+    background-color: transparent; /* 背景は透過 */
+    padding: 6px;
+    border-radius: 12px;
   }
   .cell {
     width: 40px;
     height: 40px;
-    background-color: #ddd;
-    border: 1px solid #aaa;
+    background-color: #d1f0ff; /* 空色ベースのセル */
+    border-radius: 0;
+    position: relative;
+    transition: background-color 0.2s ease;
   }
+  /* 芋虫の体：丸 */
   .green {
-    background-color: green !important;
+    background-color: #4caf50;
+    border-radius: 50%;
+    box-shadow:
+      inset 0 4px 6px #3b7a3b,
+      0 0 6px #3b7a3baa;
   }
+  /* 芋虫の頭に触覚 */
+  .green.head::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 12px;
+    width: 4px;
+    height: 10px;
+    background: #3b7a3b;
+    border-radius: 2px;
+    box-shadow: 12px 0 #3b7a3b;
+  }
+  /* 土ブロックは薄茶色の四角 */
   .brown {
-    background-color: saddlebrown !important;
+    background-color: #c2a669;
+    border-radius: 0;
   }
+  /* 赤いリンゴは丸く */
   .red {
-    background-color: red !important;
+    background-color: #e53e3e;
+    border-radius: 50%;
+    box-shadow:
+      inset 0 3px 5px #b23030,
+      0 0 8px #ff6060aa;
   }
 </style>
 </head>
@@ -38,7 +75,6 @@
   const cols = 10;
   const grid = document.getElementById("grid");
 
-  // 地形マップ（0: 空白, 1: 茶色, 2: 赤色）
   const map = [
     [0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0],
@@ -49,10 +85,9 @@
     [0,1,1,1,0,0,0,0,0,0],
     [0,0,0,1,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,1,1,1,1,1,1,1] // 茶色の床
+    [1,1,1,1,1,1,1,1,1,1]
   ];
 
-  // グリッド生成
   const cells = [];
   for (let i = 0; i < rows * cols; i++) {
     const cell = document.createElement("div");
@@ -61,7 +96,6 @@
     cells.push(cell);
   }
 
-  // 緑ブロック初期位置（左下 横並び4つ）
   let positions = [
     { row: 8, col: 3 },
     { row: 8, col: 2 },
@@ -69,10 +103,11 @@
     { row: 8, col: 0 },
   ];
 
-  // 描画関数
   function drawBlock() {
-    cells.forEach(cell => cell.classList.remove("green", "brown", "red"));
-    // 地形描画
+    cells.forEach(cell => {
+      cell.classList.remove("green", "brown", "red", "head");
+    });
+
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (map[r][c] === 1) {
@@ -82,31 +117,24 @@
         }
       }
     }
-    // 緑ブロック描画
-    positions.forEach(pos => {
-      cells[pos.row * cols + pos.col].classList.add("green");
+
+    positions.forEach((pos, idx) => {
+      const cell = cells[pos.row * cols + pos.col];
+      cell.classList.add("green");
+      if (idx === 0) {
+        cell.classList.add("head");
+      }
     });
   }
 
-  // 自分の体か判定
-  function isInBody(row, col) {
-    return positions.some(p => p.row === row && p.col === col);
-  }
-
-  // 茶色ブロックか判定
   function isBrown(row, col) {
     return map[row]?.[col] === 1;
   }
 
-  // 赤ブロックか判定
   function isRed(row, col) {
     return map[row]?.[col] === 2;
   }
 
-  // 緑の先頭だけが赤ブロックに重なれる
-  // それ以外は茶色と赤ブロックに当たり判定あり
-
-  // キー操作
   document.addEventListener("keydown", (e) => {
     const head = { ...positions[0] };
     let nextHead = { ...head };
@@ -122,41 +150,27 @@
       nextHead.row < 0 || nextHead.row >= rows
     ) return;
 
-    // 先頭が赤ブロックならOK（ここで伸長判定は後で）
-    // 先頭以外は赤も茶色もブロック判定で動けない
-
-    // 先頭以外の緑ブロックが移動先にいたら移動不可
     if (positions.slice(1).some(p => p.row === nextHead.row && p.col === nextHead.col)) return;
 
-    // 先頭移動先が茶色は移動不可
     if (isBrown(nextHead.row, nextHead.col)) return;
 
-    // 先頭以外は赤ブロックにも重なれない
-    if (isRed(nextHead.row, nextHead.col)) {
-      // 先頭のみOKなのでここはスルー
-    }
-
-    // 移動実行
     positions.unshift(nextHead);
     positions.pop();
 
     drawBlock();
   });
 
-  // 重力処理（自分の体にも乗れる）
   function applyGravity() {
-    // 下に移動予定の配列
     const nextPositions = positions.map(pos => ({
       row: pos.row + 1,
       col: pos.col
     }));
 
-    // 地形（茶色 or 赤）または画面外なら落ちれない
     const blocked = nextPositions.some(pos => {
       if (pos.row >= rows) return true;
       if (isBrown(pos.row, pos.col)) return true;
-      if (isRed(pos.row, pos.col)) return true;  // 赤もブロック判定
-      return false; // 自分の体は支えになるので落ちれないとはしない
+      if (isRed(pos.row, pos.col)) return true;
+      return false;
     });
 
     if (!blocked) {
@@ -165,14 +179,11 @@
     }
   }
 
-  // 赤ブロックに先頭が重なったら緑ブロック長さ増加
   function checkRedEat() {
     const head = positions[0];
     if (isRed(head.row, head.col)) {
-      // 赤ブロック消す
       map[head.row][head.col] = 0;
 
-      // 緑ブロック末尾に最後尾と同じ位置を追加（伸ばす）
       const tail = positions[positions.length - 1];
       positions.push({ row: tail.row, col: tail.col });
 
@@ -180,13 +191,12 @@
     }
   }
 
-  // 毎秒50msで重力と赤ブロック判定を処理
   setInterval(() => {
     applyGravity();
     checkRedEat();
   }, 50);
 
-  drawBlock(); // 初期描画
+  drawBlock();
 </script>
 
 </body>
