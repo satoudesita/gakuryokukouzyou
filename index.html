@@ -2,26 +2,61 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>芋虫ゲーム - ゴール判定付き</title>
+  <title>芋虫ゲーム - 複数コース選択</title>
   <style>
     body {
       margin: 0;
-      background: linear-gradient(to bottom, #87ceeb 0%, #b0e0ff 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      user-select: none;
+      background: linear-gradient(to bottom, #87ceeb 0%, #30b1e4 100%);
       font-family: sans-serif;
+      user-select: none;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
+    #home, #game-container {
+      width: 440px;
+      padding: 20px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 0 20px rgba(236, 6, 6, 0.2);
+    }
+    #home {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+    #home h1 {
+      margin-bottom: 12px;
+    }
+    .course-btn {
+      padding: 12px 24px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: none;
+      background-color: #3b82f6;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+      max-width: 320px;
+    }
+    .course-btn:hover {
+      background-color: #2563eb;
+    }
+
     #grid {
       display: grid;
       grid-template-columns: repeat(10, 40px);
       grid-template-rows: repeat(10, 40px);
       gap: 4px;
-      background-color: transparent;
+      background-color: #3ec9f34d;
       padding: 6px;
       border-radius: 12px;
+      margin-bottom: 16px;
     }
     .cell {
       width: 40px;
@@ -59,64 +94,139 @@
       box-shadow: 0 0 8px #3b82f6aa;
     }
     #message {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
       background: #28a745;
       color: white;
       padding: 12px 24px;
       border-radius: 12px;
       font-weight: bold;
-      display: none;
-      z-index: 1000;
       user-select: none;
       box-shadow: 0 0 10px #28a745aa;
+      text-align: center;
+      margin-bottom: 8px;
+      display: none;
+    }
+    #back-btn {
+      padding: 8px 20px;
+      border-radius: 8px;
+      border: none;
+      background-color: #ef4444;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #back-btn:hover {
+      background-color: #b91c1c;
     }
   </style>
 </head>
 <body>
 
-<div id="grid"></div>
-<div id="message">クリアしました！おめでとう！</div>
+<div id="home">
+  <h1>芋虫ゲーム - コース選択</h1>
+  <button class="course-btn" data-course="0">コース1（最初のコース）</button>
+  <button class="course-btn" data-course="1">コース2（難易度アップ）</button>
+  <button class="course-btn" data-course="2">コース3（ゴールが左上）</button>
+</div>
+
+<div id="game-container" style="display:none;">
+  <div id="message">クリアしました！おめでとう！</div>
+  <div id="grid"></div>
+  <button id="back-btn">コース選択に戻る</button>
+</div>
 
 <script>
+  const courses = [
+    // コース1（元のコース）
+    {
+      map: [
+        [0,0,0,0,0,0,0,0,0,3],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,1,1,1,0],
+        [1,1,1,0,1,0,1,0,0,0],
+        [0,0,1,0,1,0,1,0,0,0],
+        [0,0,1,0,2,0,1,0,0,0],
+        [0,0,1,1,1,1,1,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+      ],
+      startPositions: [
+        { row: 3, col: 2 },
+        { row: 3, col: 1 },
+        { row: 3, col: 0 },
+      ]
+    },
+    // コース2（障害物が増えて少し難しい）
+    {
+      map: [
+        [0,0,0,0,0,0,0,0,3,0],
+        [1,1,1,0,1,1,1,0,1,0],
+        [0,0,0,0,0,0,1,0,1,0],
+        [0,1,1,1,1,0,1,0,1,0],
+        [0,0,0,0,1,0,0,0,1,0],
+        [1,1,1,0,1,1,1,1,1,0],
+        [0,0,0,0,0,0,0,0,2,0],
+        [0,1,1,1,1,1,1,0,1,0],
+        [0,0,0,0,0,0,0,0,1,0],
+        [3,1,1,1,1,1,1,1,1,0],
+      ],
+      startPositions: [
+        { row: 6, col: 0 },
+        { row: 6, col: 1 },
+        { row: 6, col: 2 },
+      ]
+    },
+    // コース3（ゴールが左上、別の配置）
+    {
+      map: [
+        [3,0,0,0,0,0,0,0,0,0],
+        [1,1,1,0,1,1,1,0,1,0],
+        [0,0,0,0,0,0,1,0,1,0],
+        [0,1,1,1,1,0,1,0,1,0],
+        [0,0,0,0,1,0,0,0,1,0],
+        [1,1,1,0,1,1,1,1,1,0],
+        [0,0,0,0,0,0,0,0,2,0],
+        [0,1,1,1,1,1,1,0,1,0],
+        [0,0,0,0,0,0,0,0,1,0],
+        [0,1,1,1,1,1,1,1,1,0],
+      ],
+      startPositions: [
+        { row: 9, col: 9 },
+        { row: 9, col: 8 },
+        { row: 9, col: 7 },
+      ]
+    }
+  ];
+
   const rows = 10;
   const cols = 10;
+  const home = document.getElementById("home");
+  const gameContainer = document.getElementById("game-container");
   const grid = document.getElementById("grid");
+  const message = document.getElementById("message");
+  const backBtn = document.getElementById("back-btn");
 
-  // 0: 空白, 1: 土, 2: リンゴ, 3: ゴール
-  const map = [
-    [0,0,0,0,0,0,0,0,0,3],
-    [0,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,0,1,1,1,0,1,0],
-    [0,0,1,0,0,2,0,0,1,0],
-    [0,0,1,0,1,1,1,0,1,0],
-    [0,0,1,1,0,0,1,0,1,0],
-    [0,0,0,0,0,0,0,1,1,0],
-    [0,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,0]  
-  ];
+  let cells = [];
+  let positions = [];
+  let hasRed = false;
+  let isCleared = false;
+  let currentMap = [];
+  let gravityInterval;
 
-  const cells = [];
-  for (let i = 0; i < rows * cols; i++) {
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    grid.appendChild(cell);
-    cells.push(cell);
+  // グリッドを作成
+  function createGrid() {
+    grid.innerHTML = "";
+    cells = [];
+    for (let i = 0; i < rows * cols; i++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      grid.appendChild(cell);
+      cells.push(cell);
+    }
   }
 
-  // 芋虫の体の座標（先頭が頭）
-  let positions = [
-    { row: 2, col: 2 },
-    { row: 2, col: 1 },
-    { row: 2, col: 0 },
-  ];
-
-  let hasRed = false; 
-  let isCleared = false; 
-
+  // 描画関数
   function drawBlock() {
     cells.forEach(cell => {
       cell.className = "cell";
@@ -125,11 +235,11 @@
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const cell = cells[r * cols + c];
-        if (map[r][c] === 1) {
+        if (currentMap[r][c] === 1) {
           cell.classList.add("brown");
-        } else if (map[r][c] === 2) {
+        } else if (currentMap[r][c] === 2) {
           cell.classList.add("red");
-        } else if (map[r][c] === 3) {
+        } else if (currentMap[r][c] === 3) {
           cell.classList.add("goal");
         }
       }
@@ -147,7 +257,7 @@
   function isBlocked(row, col, isHead) {
     if (row < 0 || row >= rows || col < 0 || col >= cols) return true;
 
-    const cellType = map[row][col];
+    const cellType = currentMap[row][col];
     if (cellType === 1) return true; // 土
 
     if (cellType === 3) {
@@ -159,21 +269,72 @@
   }
 
   function isRed(row, col) {
-    return map[row]?.[col] === 2;
+    return currentMap[row]?.[col] === 2;
   }
 
   // クリア判定（頭だけがゴールマス上か）
-  function checkClear() {
-    if (!hasRed) return;
+function checkClear() {
+  if (!hasRed) return;
 
+  const head = positions[0];
+  if (currentMap[head.row][head.col] === 3 && !isCleared) {
+    isCleared = true;
+    clearInterval(gravityInterval); 
+    message.style.display = "block";
+  }
+}
+
+
+
+  // ゲームの初期化
+  function initGame(courseIndex) {
+    clearInterval(gravityInterval);
+    message.style.display = "none";
+    isCleared = false;
+    hasRed = false;
+    const course = courses[courseIndex];
+    currentMap = course.map.map(row => row.slice()); // コピー
+    positions = course.startPositions.map(pos => ({ ...pos }));
+
+    createGrid();
+    drawBlock();
+
+    gravityInterval = setInterval(() => {
+      if (isCleared) return;
+
+      const nextPositions = positions.map((pos, idx) => ({
+        row: pos.row + 1,
+        col: pos.col
+      }));
+
+      const blocked = nextPositions.some((pos, idx) => {
+        return isBlocked(pos.row, pos.col, idx === 0);
+      });
+
+      if (!blocked) {
+        positions = nextPositions;
+        drawBlock();
+      }
+      checkRedEat();
+      checkClear();
+    }, 80);
+  }
+
+  // 赤リンゴ取得判定
+  function checkRedEat() {
     const head = positions[0];
-    if (map[head.row][head.col] === 3 && !isCleared) {
-      isCleared = true;
-      document.getElementById("message").style.display = "block";
+    if (isRed(head.row, head.col)) {
+      currentMap[head.row][head.col] = 0;
+      hasRed = true;
+      const tail = positions[positions.length - 1];
+      positions.push({ row: tail.row, col: tail.col });
+      drawBlock();
     }
   }
 
+  // キー操作
   document.addEventListener("keydown", (e) => {
+    if (gameContainer.style.display === "none") return; // ゲーム画面じゃなければ無視
     if (isCleared) return;
 
     const head = { ...positions[0] };
@@ -185,7 +346,6 @@
     else if (e.key === "ArrowUp") nextHead.row -= 1;
     else return;
 
-    // 移動先が芋虫の体 or ブロック or ゴール（条件つき）なら進まない
     if (positions.slice(1).some(p => p.row === nextHead.row && p.col === nextHead.col)) return;
     if (isBlocked(nextHead.row, nextHead.col, true)) return;
 
@@ -197,42 +357,22 @@
     checkClear();
   });
 
-  function applyGravity() {
-    if (isCleared) return;
-
-    const nextPositions = positions.map((pos, idx) => ({
-      row: pos.row + 1,
-      col: pos.col
-    }));
-
-    const blocked = nextPositions.some((pos, idx) => {
-      return isBlocked(pos.row, pos.col, idx === 0);
+  // コース選択ボタン押下時
+  home.querySelectorAll(".course-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const courseIndex = Number(btn.dataset.course);
+      home.style.display = "none";
+      gameContainer.style.display = "block";
+      initGame(courseIndex);
     });
+  });
 
-    if (!blocked) {
-      positions = nextPositions;
-      drawBlock();
-    }
-  }
-
-  function checkRedEat() {
-    const head = positions[0];
-    if (isRed(head.row, head.col)) {
-      map[head.row][head.col] = 0;
-      hasRed = true;
-      const tail = positions[positions.length - 1];
-      positions.push({ row: tail.row, col: tail.col });
-      drawBlock();
-    }
-  }
-
-  setInterval(() => {
-    applyGravity();
-    checkRedEat();
-    checkClear();
-  }, 80);
-
-  drawBlock();
+  // 戻るボタン
+  backBtn.addEventListener("click", () => {
+    clearInterval(gravityInterval);
+    gameContainer.style.display = "none";
+    home.style.display = "flex";
+  });
 </script>
 
 </body>
