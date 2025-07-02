@@ -1,24 +1,39 @@
-from PIL import Image
-import pyocr
-# import cv2
-# from google.colab.patches import cv2_imshow
-import pyocr.builders
+import easyocr
+import cv2
+import numpy as np
 import requests
-from io import BytesIO
 
-# pyocrが使えることを確認する
-tools = pyocr.get_available_tools()
-# tesseractのみダウンロードしたため0番目を指定
-tool = tools[0]
-print(tool.get_name())
-# Tesseract (sh)と出力されればOK
-img1_path = "https://qiita-user-contents.imgix.net/https%3A%2F%2Fqiita-image-store.s3.ap-northeast-1.amazonaws.com%2F0%2F2418172%2Fa0c5fdfe-64c8-38b6-c5e8-6c4995dc10a0.png?ixlib=rb-4.0.0&auto=format&gif-q=60&q=75&s=94584b0a6add13056b9a6ad31724c8c5"
-img1 = Image.open(img1_path)
-img1
-txt1 = tool.image_to_string(
-    img1,
-    lang='jpn+eng',
-    builder=pyocr.builders.TextBuilder(tesseract_layout=6)
-)
+# 画像パスまたはURLを入力
+path = input("画像ファイルのパスまたはURLを入力してください: ")
 
-print(txt1)
+# 画像の読み込み（ローカル or URL）
+if path.startswith('http'):
+    response = requests.get(path)
+    img_array = np.asarray(bytearray(response.content), dtype=np.uint8)
+    img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+else:
+    img = cv2.imread(path)
+
+img_1 = img.copy()
+
+# easyocrのReaderを作成（日本語と英語対応）
+reader = easyocr.Reader(['ja', 'en'])
+
+# 画像からテキストと座標を抽出
+result = reader.readtext(img)
+
+# 読み込んだ文字の結果を出力
+print("読み取ったテキスト:")
+for i in range(len(result)):
+    print(result[i][1])
+
+# 文字ごとに枠を作成
+for i in range(len(result)):
+    pt1 = tuple(map(int, result[i][0][0]))
+    pt2 = tuple(map(int, result[i][0][2]))
+    cv2.rectangle(img_1, pt1, pt2, (0,255,0), 3)
+
+# 画像を保存
+cv2.imwrite('result.png', img_1)
+print("枠付き画像をresult.pngとして保存しました。")
+
