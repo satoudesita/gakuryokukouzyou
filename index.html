@@ -118,15 +118,56 @@
     #back-btn:hover {
       background-color: #b91c1c;
     }
+
+    .spike {
+      background: repeating-linear-gradient(135deg, #ef4444 0 8px, #fff 8px 16px);
+      border-radius: 6px;
+      box-shadow: 0 0 8px #ef4444aa;
+      position: relative;
+    }
+    .spike::after {
+      content: "";
+      position: absolute;
+      left: 8px; right: 8px; top: 8px; bottom: 8px;
+      border-radius: 4px;
+      border: 2px solid #fff;
+      pointer-events: none;
+    }
+
+    .course-btns {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 10px;
+    }
+
+    .stone {
+      background: repeating-linear-gradient(45deg, #888 0 10px, #bbb 10px 20px);
+      border-radius: 6px;
+      box-shadow: 0 0 8px #8888;
+      border: 2px solid #aaa;
+    }
   </style>
 </head>
 <body>
 
+<!-- コース選択ボタン部分 -->
 <div id="home">
   <h1>芋虫ゲーム - コース選択</h1>
-  <button class="course-btn" data-course="0">コース1（最初のコース）</button>
-  <button class="course-btn" data-course="1">コース2（難易度アップ）</button>
-  <button class="course-btn" data-course="2">コース3（ゴールが左上）</button>
+  <div class="course-btns">
+    <button class="course-btn" data-course="0">1</button>
+    <button class="course-btn" data-course="1">2</button>
+    <button class="course-btn" data-course="2">3</button>
+    <button class="course-btn" data-course="3">4</button>
+    <button class="course-btn" data-course="4">5</button>
+    <button class="course-btn" data-course="5">6</button>
+    <button class="course-btn" data-course="6">7</button>
+    <button class="course-btn" data-course="7">8</button>
+    <button class="course-btn" data-course="8">9</button>
+    <button class="course-btn" data-course="9">10</button>
+  </div>
 </div>
 
 <div id="game-container" style="display:none;">
@@ -137,67 +178,207 @@
 
 <script>
   const courses = [
-    // コース1（元のコース）
-    {
-      map: [
-        [0,0,0,0,0,0,0,0,0,3],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [1,1,1,0,1,1,1,0,1,0],
-        [0,0,1,0,0,2,0,0,1,0],
-        [0,0,1,0,1,1,1,0,1,0],
-        [0,0,1,1,0,0,1,0,1,0],
-        [0,0,0,0,0,0,0,1,1,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0]  
-      ],
-      startPositions: [
-        { row: 2, col: 2 },
-        { row: 2, col: 1 },
-        { row: 2, col: 0 },
-      ]
-    },
-    // コース2（障害物が増えて少し難しい）
-    {
-      map: [
-        [0,0,0,0,0,0,0,0,3,0],
-        [1,1,1,0,1,1,1,0,1,0],
-        [0,0,0,0,0,0,1,0,1,0],
-        [0,1,1,1,1,0,1,0,1,0],
-        [0,0,0,0,1,0,0,0,1,0],
-        [1,1,1,0,1,1,1,1,1,0],
-        [0,0,0,0,0,0,0,0,2,0],
-        [0,1,1,1,1,1,1,0,1,0],
-        [0,0,0,0,0,0,0,0,1,0],
-        [3,1,1,1,1,1,1,1,1,0],
-      ],
-      startPositions: [
-        { row: 6, col: 0 },
-        { row: 6, col: 1 },
-        { row: 6, col: 2 },
-      ]
-    },
-    // コース3（ゴールが左上、別の配置）
-    {
-      map: [
-        [3,0,0,0,0,0,0,0,0,0],
-        [1,1,1,0,1,1,1,0,1,0],
-        [0,0,0,0,0,0,1,0,1,0],
-        [0,1,1,1,1,0,1,0,1,0],
-        [0,0,0,0,1,0,0,0,1,0],
-        [1,1,1,0,1,1,1,1,1,0],
-        [0,0,0,0,0,0,0,0,2,0],
-        [0,1,1,1,1,1,1,0,1,0],
-        [0,0,0,0,0,0,0,0,1,0],
-        [0,1,1,1,1,1,1,1,1,0],
-      ],
-      startPositions: [
-        { row: 9, col: 9 },
-        { row: 9, col: 8 },
-        { row: 9, col: 7 },
-      ]
-    }
-  ];
+  // 1
+  {
+    map: [
+      [0,0,0,0,0,0,0,0,0,3],
+      [0,1,0,0,0,0,0,0,0,0],
+      [0,0,4,0,0,0,0,0,0,0],
+      [0,0,0,1,0,0,0,0,0,0],
+      [0,0,0,0,1,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,5,0,0],
+      [0,0,0,2,1,1,1,1,0,1],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,4,0]
+    ],
+    startPositions: [
+      { row: 9, col: 0 },
+      { row: 9, col: 1 },
+      { row: 9, col: 2 },
+    ]
+  },
+  // 2
+  {
+    map: [
+      [0,0,0,0,0,0,0,0,0,3],
+      [0,0,1,1,1,1,1,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [2,0,0,0,0,0,0,0,0,0]
+    ],
+    startPositions: [
+      { row: 9, col: 0 },
+      { row: 9, col: 1 },
+      { row: 9, col: 2 },
+    ]
+  },
+  // 3
+  {
+    map: [
+      [0,0,0,0,0,0,0,0,0,3],
+      [0,0,0,0,0,0,0,0,0,0],
+      [1,1,1,1,1,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [2,0,0,0,0,0,0,0,0,0]
+    ],
+    startPositions: [
+      { row: 9, col: 0 },
+      { row: 9, col: 1 },
+      { row: 9, col: 2 },
+    ]
+  },
+  // 4
+  {
+    map: [
+      [0,0,0,0,0,0,0,0,0,3],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [1,1,1,1,1,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [2,0,0,0,0,0,0,0,0,0]
+    ],
+    startPositions: [
+      { row: 9, col: 0 },
+      { row: 9, col: 1 },
+      { row: 9, col: 2 },
+    ]
+  },
+  // 5
+  {
+    map: [
+      [0,0,0,0,0,0,0,0,0,3],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [1,1,1,1,1,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [2,0,0,0,0,0,0,0,0,0]
+    ],
+    startPositions: [
+      { row: 9, col: 0 },
+      { row: 9, col: 1 },
+      { row: 9, col: 2 },
+    ]
+  },
+  // 6
+  {
+    map: [
+      [0,0,0,0,0,0,0,0,0,3],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [1,1,1,1,1,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [2,0,0,0,0,0,0,0,0,0]
+    ],
+    startPositions: [
+      { row: 9, col: 0 },
+      { row: 9, col: 1 },
+      { row: 9, col: 2 },
+    ]
+  },
+  // 7
+  {
+    map: [
+      [0,0,0,0,0,0,0,0,0,3],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [1,1,1,1,1,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [2,0,0,0,0,0,0,0,0,0]
+    ],
+    startPositions: [
+      { row: 9, col: 0 },
+      { row: 9, col: 1 },
+      { row: 9, col: 2 },
+    ]
+  },
+  // 8
+  {
+    map: [
+      [0,0,0,0,0,0,0,0,0,3],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [1,1,1,1,1,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [2,0,0,0,0,0,0,0,0,0]
+    ],
+    startPositions: [
+      { row: 9, col: 0 },
+      { row: 9, col: 1 },
+      { row: 9, col: 2 },
+    ]
+  },
+  // 9
+  {
+    map: [
+      [0,0,0,0,0,0,0,0,0,3],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [1,1,1,1,1,0,0,0,0,0],
+      [2,0,0,0,0,0,0,0,0,0]
+    ],
+    startPositions: [
+      { row: 9, col: 0 },
+      { row: 9, col: 1 },
+      { row: 9, col: 2 },
+    ]
+  },
+  // 10
+  {
+    map: [
+      [0,0,0,0,0,0,0,0,0,3],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [1,1,1,1,1,2,0,0,0,0]
+    ],
+    startPositions: [
+      { row: 9, col: 5 },
+      { row: 9, col: 6 },
+      { row: 9, col: 7 },
+    ]
+  }
+];
 
   const rows = 10;
   const cols = 10;
@@ -241,6 +422,10 @@
           cell.classList.add("red");
         } else if (currentMap[r][c] === 3) {
           cell.classList.add("goal");
+        } else if (currentMap[r][c] === 4) {
+          cell.classList.add("spike");
+        } else if (currentMap[r][c] === 5) {
+          cell.classList.add("stone");
         }
       }
     }
@@ -256,6 +441,9 @@
 
   function isBlocked(row, col, isHead) {
     if (row < 0 || row >= rows || col < 0 || col >= cols) return true;
+
+    // 芋虫の体がいる場所は進めない
+    if (positions.some(p => p.row === row && p.col === col)) return true;
 
     const cellType = currentMap[row][col];
     if (cellType === 1) return true; // 土
@@ -284,6 +472,29 @@ function checkClear() {
   }
 }
 
+// --- 追加: トゲブロック判定とゲームオーバー処理 ---
+function isSpike(row, col) {
+  return currentMap[row]?.[col] === 4;
+}
+
+function gameOver() {
+  clearInterval(gravityInterval);
+  message.textContent = "ゲームオーバー！";
+  message.style.background = "#ef4444";
+  message.style.display = "block";
+  isCleared = true;
+}
+
+// --- 追加: トゲ判定 ---
+function checkSpike() {
+  // 芋虫の全ての体パーツがトゲに触れていないか判定
+  for (const pos of positions) {
+    if (isSpike(pos.row, pos.col)) {
+      gameOver();
+      break;
+    }
+  }
+}
 
 
   // ゲームの初期化
@@ -317,6 +528,7 @@ function checkClear() {
       }
       checkRedEat();
       checkClear();
+      checkSpike(); // ← 追加
     }, 80);
   }
 
@@ -347,7 +559,26 @@ function checkClear() {
     else return;
 
     if (positions.slice(1).some(p => p.row === nextHead.row && p.col === nextHead.col)) return;
-    if (isBlocked(nextHead.row, nextHead.col, true)) return;
+    // 石を押す場合の判定
+    if (currentMap[nextHead.row]?.[nextHead.col] === 5) {
+      let dr = nextHead.row - head.row;
+      let dc = nextHead.col - head.col;
+      let nextStoneRow = nextHead.row + dr;
+      let nextStoneCol = nextHead.col + dc;
+      if (
+        nextStoneRow >= 0 && nextStoneRow < rows &&
+        nextStoneCol >= 0 && nextStoneCol < cols &&
+        (currentMap[nextStoneRow][nextStoneCol] === 0 || currentMap[nextStoneRow][nextStoneCol] === 4)
+      ) {
+        // 石を押す
+        currentMap[nextStoneRow][nextStoneCol] = 5;
+        currentMap[nextHead.row][nextHead.col] = 0;
+      } else {
+        return;
+      }
+    } else if (isBlocked(nextHead.row, nextHead.col, true, e.key)) {
+      return;
+    }
 
     positions.unshift(nextHead);
     positions.pop();
@@ -355,25 +586,90 @@ function checkClear() {
     drawBlock();
 
     checkClear();
+    checkSpike();
   });
 
-  // コース選択ボタン押下時
-  home.querySelectorAll(".course-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const courseIndex = Number(btn.dataset.course);
-      home.style.display = "none";
-      gameContainer.style.display = "block";
-      initGame(courseIndex);
-    });
+  // 石ブロックの重力処理
+function applyStoneGravity() {
+  let moved = false;
+  // 下から順に処理（石が連続している場合のため）
+  for (let r = rows - 2; r >= 0; r--) {
+    for (let c = 0; c < cols; c++) {
+      if (currentMap[r][c] === 5) {
+        // 石の下が空白 or トゲなら落下。ただし芋虫の体があれば落ちない
+        const isBody = positions.some(p => p.row === r + 1 && p.col === c);
+        if ((currentMap[r + 1][c] === 0 || currentMap[r + 1][c] === 4) && !isBody) {
+          currentMap[r + 1][c] = 5;
+          currentMap[r][c] = 0;
+          moved = true;
+        }
+      }
+    }
+  }
+  return moved;
+}
+
+// 重力処理に石の重力を追加
+function gravityStep() {
+  if (isCleared) return;
+
+  applyStoneGravity();
+
+  // 体の全パーツが下に進めるか判定
+  const canFall = positions.every(pos => {
+    const nextRow = pos.row + 1;
+    // フィールド外は落ちない
+    if (nextRow >= rows) return false;
+    // 芋虫自身の体は無視してOK
+    if (positions.some(p => p.row === nextRow && p.col === pos.col)) return true;
+    // 下が空白・トゲ・石なら落ちてOK
+    const cell = currentMap[nextRow][pos.col];
+    return cell === 0 || cell === 4 || cell === 5;
   });
 
-  // 戻るボタン
-  backBtn.addEventListener("click", () => {
-    clearInterval(gravityInterval);
-    gameContainer.style.display = "none";
-    home.style.display = "flex";
+  if (canFall) {
+    positions = positions.map(pos => ({
+      row: pos.row + 1,
+      col: pos.col
+    }));
+    drawBlock();
+  }
+  checkRedEat();
+  checkClear();
+  checkSpike();
+}
+
+function initGame(courseIndex) {
+  clearInterval(gravityInterval);
+  message.style.display = "none";
+  isCleared = false;
+  hasRed = false;
+  const course = courses[courseIndex];
+  currentMap = course.map.map(row => row.slice());
+  positions = course.startPositions.map(pos => ({ ...pos }));
+
+  createGrid();
+  drawBlock();
+
+  gravityInterval = setInterval(gravityStep, 80);
+}
+
+// コース選択ボタンのクリックイベント
+document.querySelectorAll('.course-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const idx = Number(btn.getAttribute('data-course'));
+    home.style.display = "none";
+    gameContainer.style.display = "block";
+    initGame(idx);
   });
+});
+
+// 戻るボタン
+backBtn.addEventListener('click', () => {
+  clearInterval(gravityInterval);
+  gameContainer.style.display = "none";
+  home.style.display = "flex";
+});
 </script>
-
 </body>
 </html>
