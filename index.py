@@ -20,7 +20,7 @@ result = reader.readtext(img)
 
 print("読み取ったテキスト:")
 for i in range(len(result)):
-    print(result[i][1])
+    print(result[i][1],end="")
 
 for i in range(len(result)):
     pt1 = tuple(map(int, result[i][0][0]))
@@ -29,4 +29,5 @@ for i in range(len(result)):
 
 # 画像を保存
 cv2.imwrite('result.png', img_1)
+print(" ")
 print("枠付き画像をresult.pngとして保存しました。")
