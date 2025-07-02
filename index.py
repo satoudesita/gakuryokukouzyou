@@ -36,4 +36,3 @@ for i in range(len(result)):
 # 画像を保存
 cv2.imwrite('result.png', img_1)
 print("枠付き画像をresult.pngとして保存しました。")
-
