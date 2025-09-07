@@ -1,97 +1,410 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>芋虫ゲーム - マップ情報</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background-color: #f0f0f0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-    pre {
-      background-color: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      overflow-x: auto;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>芋虫ゲーム - タブ切り替え版</title>
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg-color,#87ceeb);
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+#tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+#tabs button {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+  transition: 0.3s;
+  background-color: #3b82f6;
+}
+#tabs button.active { background-color: #2563eb; }
+
+.tab-content {
+  display: none;
+  width: 480px;
+  max-width: 90%;
+  padding: 20px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.tab-content.active { display: flex; }
+
+#course-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 70px);
+  grid-template-rows: repeat(4, 70px);
+  gap: 12px;
+  justify-content: center;
+  width: 100%;
+}
+
+.course-btn {
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.course-btn.unlocked { background-color: #3b82f6; }
+.course-btn.unlocked:hover { background-color: #2563eb; }
+.course-btn.cleared { background-color: #10b981; }
+.course-btn.locked { background-color: #aaa; cursor: default; }
+
+#start-game-btn, .control-btn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: bold;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+#start-game-btn { background-color: #10b981; }
+#start-game-btn:hover { background-color: #059669; }
+
+#game-container {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(10, 40px);
+  grid-template-rows: repeat(10, 40px);
+  gap: 4px;
+  background: rgba(62,201,243,0.3);
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.cell { width: 40px; height: 40px; position: relative; transition: 0.2s; }
+
+.green {
+  background-color: var(--worm-color,#4caf50);
+  border-radius: 50%;
+  box-shadow: inset 0 4px 6px #3b7a3b, 0 0 6px #3b7a3baa;
+}
+.green.head::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 12px;
+  width: 4px;
+  height: 10px;
+  background: #3b7a3b;
+  border-radius: 2px;
+  box-shadow: 12px 0 #3b7a3b;
+}
+
+.brown { background-color: #c2a669; }
+.red {
+  background-color: #e53e3e;
+  border-radius: 50%;
+  box-shadow: inset 0 3px 5px #b23030, 0 0 8px #ff6060aa;
+}
+.goal { background-color: #3b82f6; border-radius: 10px; box-shadow: 0 0 8px #3b82f6aa; }
+
+#message {
+  display: none;
+  background: #28a745;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: bold;
+  text-align:center;
+}
+
+#score { display: none; font-weight: bold; text-align: center; }
+
+.control-btn {
+  min-width: 140px;
+  background-color: #10b981;
+}
+.control-btn:hover { background-color: #059669; }
+#back-btn { background-color: #ef4444; }
+#back-btn:hover { background-color: #b91c1c; }
+
+input[type="text"], input[type="color"] {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+label { display: flex; align-items: center; gap: 8px; }
+</style>
 </head>
 <body>
 
-<h1>芋虫ゲーム - マップ情報</h1>
-<pre>
-{
-  "courses": [
-    {
-      "name": "コース1",
-      "map": [
-        [0,0,0,0,0,0,0,0,0,3],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [1,1,1,0,1,1,1,0,1,0],
-        [0,0,1,0,0,2,0,0,1,0],
-        [0,0,1,0,1,1,1,0,1,0],
-        [0,0,1,1,0,0,1,0,1,0],
-        [0,0,0,0,0,0,0,1,1,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0]
-      ],
-      "startPositions": [
-        { "row": 2, "col": 2 },
-        { "row": 2, "col": 1 },
-        { "row": 2, "col": 0 }
-      ]
-    },
-    {
-      "name": "コース2",
-      "map": [
-        [0,0,0,0,0,0,0,0,3,0],
-        [1,1,1,0,1,1,1,0,1,0],
-        [0,0,0,0,0,0,1,0,1,0],
-        [0,1,1,1,1,0,1,0,1,0],
-        [0,0,0,0,1,0,0,0,1,0],
-        [1,1,1,0,1,1,1,1,1,0],
-        [0,0,0,0,0,0,0,0,2,0],
-        [0,1,1,1,1,1,1,0,1,0],
-        [0,0,0,0,0,0,0,0,1,0],
-        [3,1,1,1,1,1,1,1,1,0]
-      ],
-      "startPositions": [
-        { "row": 6, "col": 0 },
-        { "row": 6, "col": 1 },
-        { "row": 6, "col": 2 }
-      ]
-    },
-    {
-      "name": "コース3",
-      "map": [
-        [3,0,0,0,0,0,0,0,0,0],
-        [1,1,1,0,1,1,1,0,1,0],
-        [0,0,0,0,0,0,1,0,1,0],
-        [0,1,1,1,1,0,1,0,1,0],
-        [0,0,0,0,1,0,0,0,1,0],
-        [1,1,1,0,1,1,1,1,1,0],
-        [0,0,0,0,0,0,0,0,2,0],
-        [0,1,1,1,1,1,1,0,1,0],
-        [0,0,0,0,0,0,0,0,1,0],
-        [0,1,1,1,1,1,1,1,1,0]
-      ],
-      "startPositions": [
-        { "row": 9, "col": 9 },
-        { "row": 9, "col": 8 },
-        { "row": 9, "col": 7 }
-      ]
-    }
-  ]
-}
-</pre>
+<div id="tabs">
+  <button data-tab="course" class="active">コース選択</button>
+  <button data-tab="icon">アイコン設定</button>
+</div>
 
+<div id="course" class="tab-content active">
+  <h1>コース選択</h1>
+  <div id="course-grid"></div>
+  <button id="start-game-btn">ゲーム開始</button>
+</div>
+
+<div id="icon" class="tab-content">
+  <h1>アイコン設定</h1>
+  <label>名前: <input type="text" id="player-name" placeholder="あなたの名前"></label>
+  <label>背景色: <input type="color" id="bg-color" value="#87ceeb"></label>
+  <label>芋虫の色: <input type="color" id="worm-color" value="#4caf50"></label>
+  <button id="reset-colors-btn" class="control-btn">色をリセット</button>
+</div>
+
+<div id="game-container">
+  <div id="message">クリアしました！おめでとう！</div>
+  <div id="score"></div>
+  <button id="restart-btn" class="control-btn">リスタート</button>
+  <div id="grid"></div>
+  <button id="back-btn" class="control-btn">コース選択に戻る</button>
+</div>
+
+<script>
+// --- タブ切替 ---
+const tabs=document.querySelectorAll("#tabs button");
+tabs.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    tabs.forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    const tab=btn.dataset.tab;
+    document.querySelectorAll(".tab-content").forEach(tc=>tc.classList.remove("active"));
+    document.getElementById(tab).classList.add("active");
+  });
+});
+
+// --- コースデータ ---
+const rows=10, cols=10;
+const courses=[
+  {map:[[0,0,0,0,0,0,0,0,0,3],[0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1],[0,0,0,0,0,0,0,0,0,1],[0,0,0,2,0,0,0,0,0,1],[1,1,1,1,1,1,1,1,0,1],[0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,1]],startPositions:[{row:2,col:2},{row:2,col:1},{row:2,col:0}]},
+  {map:[[0,0,0,0,0,0,0,0,3,0],[1,1,1,0,1,1,1,0,1,0],[0,0,0,0,0,0,1,0,1,0],[0,1,1,1,1,0,1,0,1,0],[0,0,0,0,1,0,0,0,1,0],[1,1,1,0,1,1,1,1,1,0],[0,0,0,0,0,0,0,0,2,0],[0,1,1,1,1,1,1,0,1,0],[0,0,0,0,0,0,0,0,2,0],[3,1,1,1,1,1,1,1,1,0]],startPositions:[{row:6,col:0},{row:6,col:1},{row:6,col:2}]}
+];
+
+// --- ローカルストレージ ---
+let playerName=localStorage.getItem("playerName")||"名無し";
+let clearedCourses=JSON.parse(localStorage.getItem("clearedCourses")||"[]");
+document.getElementById("player-name").value=playerName;
+
+const courseGrid=document.getElementById("course-grid");
+let currentCourseIndex=0;
+
+function renderCourseButtons(){
+  courseGrid.innerHTML="";
+  for(let i=0;i<20;i++){
+    const btn=document.createElement("button");
+    btn.textContent=i+1;
+    if(clearedCourses.includes(i)) btn.className="course-btn cleared";
+    else btn.className="course-btn unlocked";
+    btn.dataset.course=i;
+    btn.addEventListener("click",()=>{
+      currentCourseIndex=i;
+      alert(`コース ${i+1} 選択`);
+    });
+    courseGrid.appendChild(btn);
+  }
+}
+renderCourseButtons();
+
+// --- ゲーム ---
+const gameContainer=document.getElementById("game-container");
+const grid=document.getElementById("grid");
+const message=document.getElementById("message");
+const scoreDisplay=document.getElementById("score");
+const restartBtn=document.getElementById("restart-btn");
+const backBtn=document.getElementById("back-btn");
+
+let cells=[],positions=[],hasRed=false,isCleared=false,currentMap=[],gravityInterval,score=0;
+let bgColor="#87ceeb",wormColor="#4caf50";
+
+function createGrid(){ 
+  grid.innerHTML=""; cells=[];
+  for(let i=0;i<rows*cols;i++){
+    const cell=document.createElement("div");
+    cell.className="cell";
+    grid.appendChild(cell);
+    cells.push(cell);
+  }
+}
+
+function drawBlock(){
+  cells.forEach(c=>c.className="cell");
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cell=cells[r*cols+c];
+      const type=currentMap[r][c];
+      if(type===1) cell.classList.add("brown");
+      else if(type===2) cell.classList.add("red");
+      else if(type===3) cell.classList.add("goal");
+    }
+  }
+  positions.forEach((pos,idx)=>{
+    const cell=cells[pos.row*cols+pos.col];
+    cell.classList.add("green");
+    if(idx===0) cell.classList.add("head");
+  });
+}
+
+function isBlocked(row, col, isHead) {
+  if (row < 0 || row >= rows || col < 0 || col >= cols) return true;
+  const type = currentMap[row][col];
+  if (type === 1) return true;
+  if (type === 3 && !(hasRed && isHead)) return true;
+  for (let i = 0; i < positions.length; i++) {
+    if (positions[i].row === row && positions[i].col === col) return true;
+  }
+  return false;
+}
+
+function isRed(row,col){ return currentMap[row]?.[col]===2; }
+
+function checkRedEat(){
+  const head=positions[0];
+  if(isRed(head.row,head.col)){
+    currentMap[head.row][head.col]=0;
+    hasRed=true;
+    score++;
+    const tail=positions[positions.length-1];
+    positions.push({row:tail.row,col:tail.col});
+    drawBlock();
+  }
+}
+
+function checkClear(){
+  if(!hasRed) return;
+  const head=positions[0];
+  if(currentMap[head.row][head.col]===3 && !isCleared){
+    isCleared=true;
+    clearInterval(gravityInterval);
+    message.style.display="block";
+    scoreDisplay.textContent=`スコア: ${score}`;
+    scoreDisplay.style.display="block";
+    restartBtn.style.display="inline-block";
+    if(!clearedCourses.includes(currentCourseIndex)){
+      clearedCourses.push(currentCourseIndex);
+      localStorage.setItem("clearedCourses", JSON.stringify(clearedCourses));
+      renderCourseButtons();
+    }
+  }
+}
+
+function initGame(courseIndex){
+  clearInterval(gravityInterval);
+  message.style.display="none";
+  scoreDisplay.style.display="none";
+  restartBtn.style.display="none";
+  isCleared=false; hasRed=false; score=0;
+  const course=courses[courseIndex];
+  currentMap=course.map.map(r=>r.slice());
+  positions=course.startPositions.map(p=>({...p}));
+  createGrid();
+  drawBlock();
+
+  gravityInterval = setInterval(() => {
+  if (isCleared) return;
+
+  const tail = positions[positions.length - 1]; // 末尾を確認
+  const nextRow = tail.row + 1;
+  const nextCol = tail.col;
+
+  // 末尾が地面やブロックにぶつかるか判定
+  const blocked = isBlocked(nextRow, nextCol, false);
+
+  if (!blocked) {
+    // 全体を1マス下に移動
+    positions = positions.map(p => ({ row: p.row + 1, col: p.col }));
+    drawBlock();
+    checkRedEat();
+    checkClear();
+  } else {
+    // 下に行けない場合はその場で赤やゴール判定
+    checkRedEat();
+    checkClear();
+  }
+}, 200);
+ // 80msだと速すぎるので200msくらいが見やすい
+
+}
+
+// --- キー操作 ---
+document.addEventListener("keydown",(e)=>{
+  if(gameContainer.style.display==="none") return;
+  if(isCleared) return;
+  const head=positions[0];
+  let newRow=head.row,newCol=head.col;
+  if(e.key==="ArrowUp") newRow--;
+  else if(e.key==="ArrowDown") newRow++;
+  else if(e.key==="ArrowLeft") newCol--;
+  else if(e.key==="ArrowRight") newCol++;
+  if(!isBlocked(newRow,newCol,true)){
+    positions.unshift({row:newRow,col:newCol});
+    positions.pop();
+    drawBlock();
+    checkRedEat();
+    checkClear();
+  }
+});
+
+// --- ボタン操作 ---
+document.getElementById("start-game-btn").addEventListener("click",()=>{
+  playerName=document.getElementById("player-name").value||"名無し";
+  localStorage.setItem("playerName",playerName);
+  bgColor=document.getElementById("bg-color").value;
+  wormColor=document.getElementById("worm-color").value;
+  document.body.style.backgroundColor=bgColor;
+  document.documentElement.style.setProperty('--worm-color', wormColor);
+  document.querySelectorAll(".tab-content").forEach(tc=>tc.classList.remove("active"));
+  gameContainer.style.display="flex";
+  initGame(currentCourseIndex);
+});
+
+restartBtn.addEventListener("click",()=>{ initGame(currentCourseIndex); });
+
+backBtn.addEventListener("click", () => {
+  gameContainer.style.display="none";
+  document.querySelectorAll(".tab-content").forEach(tc=>tc.classList.remove("active"));
+  document.getElementById("course").classList.add("active");
+  tabs.forEach(b=>b.classList.remove("active"));
+  document.querySelector('#tabs button[data-tab="course"]').classList.add("active");
+});
+
+// --- 色リセット ---
+const resetBtn = document.getElementById("reset-colors-btn");
+const initialBgColor = "#87ceeb";
+const initialWormColor = "#4caf50";
+
+resetBtn.addEventListener("click", () => {
+  document.getElementById("bg-color").value = initialBgColor;
+  document.getElementById("worm-color").value = initialWormColor;
+  document.body.style.backgroundColor = initialBgColor;
+  document.documentElement.style.setProperty('--worm-color', initialWormColor);
+});
+</script>
 </body>
 </html>
